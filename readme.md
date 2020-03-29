@@ -13,7 +13,7 @@ A implementation of shot change detection method described in [1].
 
 ### Usage
 
-First run `SCD.m`, in which you should designate the video path, start time, end time and a output path for the indexing script. Start/end time is the time(seconds) from/to which you process your shot change detection.
+Run `SCD.m` and provide the video path, start time, end time and a output path for the indexing script. Start/end time is the time(seconds) from/to which you process your shot change detection.
 
 The script contains the following: 
 
@@ -26,7 +26,7 @@ The script contains the following:
 
 The changing frame indexes count from `start time`.
 
-If you would like to visually check the separating result, run `Cut.m`, in which you need to designate the script path.
+If you would like to visually check the separating result, run `Cut.m` with the script path. You can choose to resize the video frame.
 
 ### References
 

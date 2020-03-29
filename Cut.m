@@ -2,6 +2,8 @@ clear
 clc
 %% parameters
 scriptname = "test_idx.txt";
+if_resize = true;
+shape_new = [486, 1024];
 
 %% read script
 scriptf = fopen(scriptname, 'r');
@@ -23,6 +25,9 @@ loc_ptr = 1;  % location pointer(toward `location array`)
 rdr_idx = 1;  % reader index
 while reader.CurrentTime < end_time
     frame = readFrame(reader);
+    if if_resize
+        frame = imresize(frame, shape_new);
+    end
     if (loc_ptr <= length(location) && rdr_idx == location(loc_ptr))
         close(Writer)
         wf_idx = wf_idx + 1;
