@@ -1,11 +1,11 @@
 clear
 clc
 %% parameters
-filename = "test.mp4";  % video path
+filename = "shot_1.avi";  % video path
 savename = "index.txt";  % where to save index file
-win_len = 5000;  % lenght of the computing window
+win_len = 500;  % lenght of the computing window
 start_time = 0;  % start reading, in seconds
-end_time = 60;  % end of reading, in seconds. if negative, set to END
+end_time = -1;  % end of reading, in seconds. if negative, set to END
 
 %% initialize
 reader = VideoReader(filename);
@@ -26,10 +26,9 @@ savef = fopen(savename, 'w');
 fprintf(savef, '%s\r\n%.2f\r\n%.2f\r\n', filename, start_time, end_time);
 
 %% process frames
-win_count = 0;
-tic;
-while reader.CurrentTime < end_time
-    numFrame = min((end_frame - start_frame) - win_count * win_len, win_len);
+CurrentFrame = start_frame; 
+while CurrentFrame < end_frame
+    numFrame = min(end_frame - CurrentFrame, win_len);
     S = histo(reader, numFrame);
     S_s = smooth(S);
     [pks, loc] = findpeaks(-S_s);
@@ -37,13 +36,13 @@ while reader.CurrentTime < end_time
     pks = -pks(real_pks);
     loc = loc(real_pks);
     % add bias
-    loc = loc + win_count * win_len * ones('like', loc);
-    win_count = win_count + 1;
+    loc = loc + double(CurrentFrame) * ones('like', loc);
+    CurrentFrame = CurrentFrame + numFrame;
     % write into file
     for loc_idx = 1: length(loc)
         fprintf(savef, '%d\r\n', loc(loc_idx));
     end
 end
-disp(toc);
+
 %% clean up
 fclose(savef);
