@@ -1,4 +1,5 @@
-function S = histo(reader, numFrame, end_time)
+function S = histo(reader, numFrame)
+% Functions for computing hsv histogram and intersections
 % parameters
 h_bins = 8;
 s_bins = 4;
@@ -9,12 +10,7 @@ num_of_bins = h_bins + s_bins + v_bins;
 histograms = zeros(num_of_bins, 2);  % previous histo in 1st row, current in 2nd row
 S = zeros(numFrame, 1);
 
-early_break = true;
 for n = 1: numFrame
-    if (reader.CurrentTime >= end_time)
-        early_break = true;
-        break
-    end
     hsv_image = rgb2hsv(imresize(readFrame(reader), [180, 320]));
 
     h = hsv_image(:, :, 1);
@@ -37,10 +33,6 @@ for n = 1: numFrame
         S(n) = sum(min(histograms, [], 2));
         histograms(:, 1) = histograms(:, 2);
     end
-end
-
-if early_break
-    S = S(1: n -1);
 end
 
 end

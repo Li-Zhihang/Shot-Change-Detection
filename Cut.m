@@ -1,10 +1,10 @@
 clear
 clc
 %% parameters
-scriptname = "test_idx.txt";
+scriptname = "index.txt";
 if_resize = true;
-shape_new = [486, 1024];
-output_format = 'MPEG-4';
+shape_new = [576, 1024];
+%output_format = 'MPEG-4';
 
 %% read script
 scriptf = fopen(scriptname, 'r');
@@ -19,7 +19,7 @@ reader = VideoReader(videofile);
 reader.CurrentTime = start_time;
 
 wf_idx = 1;  % write file index
-Writer = VideoWriter(strcat("shot_", num2str(wf_idx)), output_format);
+Writer = VideoWriter(strcat("shot_", num2str(wf_idx)));
 open(Writer)
 
 loc_ptr = 1;  % location pointer(toward `location array`)
@@ -33,7 +33,7 @@ while reader.CurrentTime < end_time
         close(Writer)
         wf_idx = wf_idx + 1;
         loc_ptr = loc_ptr + 1;
-        Writer = VideoWriter(strcat("shot_", num2str(wf_idx)), output_format);
+        Writer = VideoWriter(strcat("shot_", num2str(wf_idx)));
         open(Writer)
     end
     writeVideo(Writer, frame)

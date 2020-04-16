@@ -1,4 +1,5 @@
 function S_smoothed = smooth(S)
+% Function for smoothing curve
 % parameters
 len_s = length(S);
 nIters = 100;
