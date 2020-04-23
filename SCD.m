@@ -1,11 +1,11 @@
 clear
 clc
 %% parameters
-filename = "shot_1.avi";  % video path
+filename = "test.mp4";  % video path
 savename = "index.txt";  % where to save index file
-win_len = 500;  % lenght of the computing window
+win_len = 5000;  % lenght of the computing window
 start_time = 0;  % start reading, in seconds
-end_time = -1;  % end of reading, in seconds. if negative, set to END
+end_time = 60;  % end of reading, in seconds. if negative, set to END
 
 %% initialize
 reader = VideoReader(filename);
@@ -27,6 +27,7 @@ fprintf(savef, '%s\r\n%.2f\r\n%.2f\r\n', filename, start_time, end_time);
 
 %% process frames
 CurrentFrame = start_frame; 
+tic
 while CurrentFrame < end_frame
     numFrame = min(end_frame - CurrentFrame, win_len);
     S = histo(reader, numFrame);
@@ -43,6 +44,6 @@ while CurrentFrame < end_frame
         fprintf(savef, '%d\r\n', loc(loc_idx));
     end
 end
-
+toc
 %% clean up
 fclose(savef);

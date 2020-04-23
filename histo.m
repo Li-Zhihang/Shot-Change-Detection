@@ -5,34 +5,29 @@ h_bins = 8;
 s_bins = 4;
 v_bins = 4;
 num_of_bins = h_bins + s_bins + v_bins;
+shape = [180, 320];
 
 % compute histograms
-histograms = zeros(num_of_bins, 2);  % previous histo in 1st row, current in 2nd row
-S = zeros(numFrame, 1);
+hists = zeros(numFrame, num_of_bins);  % previous histo in 1st row, current in 2nd row
 
 for n = 1: numFrame
-    hsv_image = rgb2hsv(imresize(readFrame(reader), [180, 320]));
+    frames = readFrame(reader);
+    hsv_image = rgb2hsv(imresize(frames, shape));
 
-    h = hsv_image(:, :, 1);
-    s = hsv_image(:, :, 2);
-    v = hsv_image(:, :, 3);
+    h = imhist(hsv_image(:, :, 1), h_bins)';
+    s = imhist(hsv_image(:, :, 2), s_bins)';
+    v = imhist(hsv_image(:, :, 3), v_bins)';
 
-    h_hist = imhist(h, h_bins);
-    h_hist = h_hist ./ sum(h_hist);
-    s_hist = imhist(s, s_bins);
-    s_hist = s_hist ./ sum(s_hist);
-    v_hist = imhist(v, v_bins);
-    v_hist = v_hist ./ sum(v_hist);
+    hists(n, :) = [h, s, v];
     
-    if (n == 1)
-        histograms(: , 1) = [h_hist; s_hist; v_hist] ./ 3;
-        S(n) = sum(histograms(: , 1));
-    else
-        histograms(: , 2) = [h_hist; s_hist; v_hist] ./ 3;
-        % find the intersection
-        S(n) = sum(min(histograms, [], 2));
-        histograms(:, 1) = histograms(:, 2);
-    end
 end
+
+% normalize histograms
+hists = hists ./ (3 * shape(1) * shape(2));
+% compute intersection
+hists_shift = [hists(1, :); hists(1: numFrame - 1, :)];
+hists_pair = cat(3, hists, hists_shift);
+hists_min = min(hists_pair, [], 3);
+S = sum(hists_min, 2);
 
 end
