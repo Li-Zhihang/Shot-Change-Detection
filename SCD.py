@@ -82,8 +82,9 @@ def main(args):
     start_frame, end_frame = check_time(args, cap)
     print('Start Reading...')
     with open(args.savename, 'w') as f:
-        f.write('{:s}\n{:d}\n{:d}\n'.format(args.filename, start_frame, end_frame))
-        start_time = time.time()
+        f.write('{:s}\n{:d}\n{:d}\n'.format(
+            args.filename, start_frame, end_frame))
+        start = time.time()
         # read frames
         while cap.get(cv.CAP_PROP_POS_FRAMES) < end_frame:
             former_frames = int(cap.get(cv.CAP_PROP_POS_FRAMES))
@@ -95,8 +96,16 @@ def main(args):
             # write in
             for k in range(len(loc)):
                 f.write('{:d}\n'.format(loc[k]))
-        print('time cost: {:2f}'.format(time.time() - start_time))
+        stop = time.time()
+
     print('Done.')
+    print('video name: {:s}\nframe rate: {:.2f}\nframe size: {:d}x{:d}\nprocessed length: {:.2f}min'.format(
+        args.filename, cap.get(cv.CAP_PROP_FPS),
+        int(cap.get(cv.CAP_PROP_FRAME_HEIGHT)),
+        int(cap.get(cv.CAP_PROP_FRAME_WIDTH)),
+        (args.end_sec - args.start_sec) / 60))
+    print('time cost: {:.2f}min'.format((stop - start) / 60))
+
     cap.release()
 
 
