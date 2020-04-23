@@ -12,7 +12,7 @@ num_of_bins = h_bins + s_bins + v_bins
 
 
 def check_time(args, cap):
-    frame_count = cap.get(cv.CAP_PROP_FRAME_COUNT)
+    frame_count = int(cap.get(cv.CAP_PROP_FRAME_COUNT))
 
     start_frame = int(args.start_sec * cap.get(cv.CAP_PROP_FPS))
     if args.end_sec < 0:
@@ -34,9 +34,13 @@ def check_time(args, cap):
 
 
 def get_intersection(cap, numFrame, shape):
+    eof_flag = False
     hists = np.zeros((numFrame, num_of_bins))
     for k in range(numFrame):
         _, img = cap.read()
+        if img is None:
+            eof_flag = True
+            break
         img = cv.resize(img, (shape[1], shape[0]))
         hsv_img = cv.cvtColor(img, cv.COLOR_BGR2HSV)
 
@@ -46,6 +50,9 @@ def get_intersection(cap, numFrame, shape):
 
         hists[k] = np.concatenate((h, s, v))
 
+    if img is None:
+        hists = hists[0:k]
+        numFrame = k
     # compute intersection
     hists = hists / (3 * shape[0] * shape[1])
     hists_shift = hists[[0] + [x for x in range(numFrame - 1)]]
@@ -53,7 +60,7 @@ def get_intersection(cap, numFrame, shape):
     hists_min = np.min(hists_pair, axis=2)
     S = np.sum(hists_min, axis=1)
 
-    return S
+    return S, eof_flag
 
 
 def smooth_curve(S):
@@ -82,29 +89,40 @@ def main(args):
     start_frame, end_frame = check_time(args, cap)
     print('Start Reading...')
     with open(args.savename, 'w') as f:
-        f.write('{:s}\n{:d}\n{:d}\n'.format(
-            args.filename, start_frame, end_frame))
+        f.write('{:s}\n{:d}\n'.format(args.filename, start_frame))
+        shot_count = 1
         start = time.time()
         # read frames
         while cap.get(cv.CAP_PROP_POS_FRAMES) < end_frame:
             former_frames = int(cap.get(cv.CAP_PROP_POS_FRAMES))
             numFrame = int(min(end_frame - former_frames, args.win_len))
-            S = get_intersection(cap, numFrame, args.shape)
+            S, flag = get_intersection(cap, numFrame, args.shape)
             S = smooth_curve(S)
             loc, _ = find_peaks(-S, -0.92)
             loc = loc + former_frames * np.ones(loc.shape, np.int32)
             # write in
             for k in range(len(loc)):
                 f.write('{:d}\n'.format(loc[k]))
+                shot_count += 1
+            if flag:
+                end_frame = int(cap.get(cv.CAP_PROP_POS_FRAMES))
+                break
+        f.write('{:d}\n'.format(end_frame))
         stop = time.time()
 
     print('Done.')
-    print('video name: {:s}\nframe rate: {:.2f}\nframe size: {:d}x{:d}\nprocessed length: {:.2f}min'.format(
-        args.filename, cap.get(cv.CAP_PROP_FPS),
+    fps = cap.get(cv.CAP_PROP_FPS)
+    print('video name: {:s}\nframe rate: {:.2f}\nframe size: {:d}x{:d}'.format(
+        args.filename, fps,
         int(cap.get(cv.CAP_PROP_FRAME_HEIGHT)),
-        int(cap.get(cv.CAP_PROP_FRAME_WIDTH)),
-        (args.end_sec - args.start_sec) / 60))
-    print('time cost: {:.2f}min'.format((stop - start) / 60))
+        int(cap.get(cv.CAP_PROP_FRAME_WIDTH))))
+
+    print('start time: {:d}\'{:02d}\"\nstop time: {:d}\'{:02d}\"\nprocessed length: {:d}\'{:02d}\"'.format(
+        int(start_frame / fps) // 60, int(start_frame / fps) % 60,
+        int(end_frame / fps) // 60, int(end_frame / fps) % 60,
+        int((end_frame - start_frame) / fps) // 60, int((end_frame - start_frame) / fps) % 60
+        ))
+    print('time cost: {:d}\'{:02d}\"'.format(int(stop - start) // 60, int(stop - start) % 60))
 
     cap.release()
 
