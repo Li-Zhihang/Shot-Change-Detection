@@ -89,7 +89,7 @@ def main(args):
     start_frame, end_frame = check_time(args, cap)
     print('Start Reading...')
     with open(args.savename, 'w') as f:
-        f.write('{:s}\n{:d}\n'.format(args.filename, start_frame))
+        f.write('{:s}\n{:.2f}\n{:d}\n'.format(args.filename, cap.get(cv.CAP_PROP_FPS), start_frame))
         shot_count = 1
         start = time.time()
         # read frames
@@ -102,7 +102,7 @@ def main(args):
             loc = loc + former_frames * np.ones(loc.shape, np.int32)
             # write in
             for k in range(len(loc)):
-                f.write('{:d}\n'.format(loc[k]))
+                f.write('{:d}\n'.format(loc[k] - 1))
                 shot_count += 1
             if flag:
                 end_frame = int(cap.get(cv.CAP_PROP_POS_FRAMES))

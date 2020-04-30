@@ -13,7 +13,6 @@ Matlab codes runs much slower than the python version (see below) due to the ine
 | SCD.m    | search for the changing frames                               |
 | histo.m  | function: compute the histogram and intersection of each frame |
 | smooth.m | function: smooth the intersection curve                      |
-| Cut.m    | re-read the video and clip it into fragments                 |
 
 ### Usage
 
@@ -23,14 +22,13 @@ The script contains the following:
 
 ```
 [1] video name (string)
-[2] start frame (int)
-[3] end frame (float)
-[4-END] changing frame absolute indexes (int)
+[2] fps (float)
+[3] start frame (int)
+[4+] changing frame absolute indexes (int)
+[end] end frame (int)
 ```
 
-The changing frame indexes count from `start time`.
-
-If you would like to visually check the separating result, run `Cut.m` with the script path. You can choose to resize the video frame.
+If you would like to visually check the separating result, run `cut.py` with the script path.  Remember to install moviepy lib and FFmpeg tool.
 
 
 

@@ -23,7 +23,7 @@ if end_frame > reader.NumFrames || end_frame < start_frame
     error('End time must less than the video duration and bigger than the start time');
 end
 savef = fopen(savename, 'w');
-fprintf(savef, '%s\r\n%.2f\r\n%.2f\r\n', filename, start_time, end_time);
+fprintf(savef, '%s\n%.2f\n%d\n', filename, reader.FrameRate, start_frame);
 
 %% process frames
 CurrentFrame = start_frame; 
@@ -41,9 +41,10 @@ while CurrentFrame < end_frame
     CurrentFrame = CurrentFrame + numFrame;
     % write into file
     for loc_idx = 1: length(loc)
-        fprintf(savef, '%d\r\n', loc(loc_idx));
+        fprintf(savef, '%d\n', loc(loc_idx));
     end
 end
+fprintf(savef, '%d\n', end_frame);
 toc
 %% clean up
 fclose(savef);
